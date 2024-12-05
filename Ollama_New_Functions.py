@@ -15,6 +15,7 @@ def add_two_numbers(a: int, b: int) -> int:
 
 
 from yeelight import Bulb, discover_bulbs, LightType
+import subprocess
 
 # Получение информации о лампочках
 discovered_bulbs = discover_bulbs()
@@ -158,6 +159,65 @@ def directly_answer(content: str) -> str:
     return content
 
 
+
+
+
+def open_zen(content: str) -> str:
+    """
+    Открыть браузер в фоновом режиме.
+
+    Возвращает:
+        str: Сообщение о результате установки игрового режима освещения.
+    """
+
+    # Запустить браузер в фоновом режиме
+    subprocess.Popen(['zen-browser'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    return 
+
+
+import urllib.parse
+
+def open_google_search(query: str) -> None:
+    """
+    Открыть страницу поиска Google с заданным текстовым запросом.
+
+    Аргументы:
+        query (str): Текстовой запрос для поиска в Google.
+    """
+    # Кодировать запрос в URL-формат
+    encoded_query = urllib.parse.quote(query)
+    
+    # Создать полный URL для поиска
+    google_search_url = f'https://www.google.com/search?q={encoded_query}'
+    
+    # Открыть браузер с Google Search
+    subprocess.Popen(['chromium', google_search_url], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
+
+
+def smart_answer(query: str) -> None:
+    """
+    Если вопрос сложный, отправить запрос в умную нейросеть
+
+    Args:
+        content: Текст вопроса пользователя
+
+    Returns:
+        str: Возвращает переданный текст
+    """
+    from g4f.client import Client
+
+    client = Client()
+    response = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=[{"role": "user", "content": query}],
+        provider="DDG"
+        # Add any other necessary parameters
+    )
+    print(response.choices[0].message.content)
+    return response.choices[0].message.content
+
+
 import ollama
 
 
@@ -184,7 +244,8 @@ while True:
         ],
     tools=[add_two_numbers, turn_all_on, turn_all_off, 
     directly_answer, set_brightness, game_mode_light, night_light,
-    cozy_home, standard, cold_light], # Actual function reference
+    cozy_home, standard, cold_light, open_zen, open_google_search,
+    smart_answer], # Actual function reference
     )
 
 
@@ -200,6 +261,9 @@ while True:
     'cozy_home': cozy_home,
     'standard': standard,
     'cold_light': cold_light,
+    'open_zen': open_zen,
+    'open_google_search': open_google_search,
+    'smart_answer': smart_answer,
     }
 
     for tool in response.message.tool_calls or []:
